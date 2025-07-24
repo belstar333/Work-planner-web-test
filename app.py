@@ -15,7 +15,7 @@ from collections import defaultdict
 from openpyxl.styles import Alignment
 
 # --- 기본 설정 ---
-DATA_DIR = '/var/data'
+DATA_DIR = 'data'
 DATABASE = os.path.join(DATA_DIR, 'database.db')
 UPLOAD_FOLDER = os.path.join(DATA_DIR, 'uploads')
 MAINTENANCE_FOLDER = os.path.join(DATA_DIR, 'maintenance_uploads')
