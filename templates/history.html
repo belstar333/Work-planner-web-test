@@ -20,14 +20,26 @@
     <a href="{{ url_for('history', username=user.username, filter='monthly') }}" class="{{ 'active' if current_filter == 'monthly' }}">최근 1달</a>
 </div>
 <table>
-    <thead> <tr> <th>날짜 / 시간</th> <th>위치</th> </tr> </thead>
+    <thead>
+        <tr>
+            <th>날짜 / 시간</th>
+            <th>위치</th>
+            <th>관리</th> </tr>
+    </thead>
     <tbody>
         {% for record in records %}
         <tr>
             <td>{{ record.timestamp }}</td>
             <td>{{ record.location }}</td>
+            <td>
+                <form action="{{ url_for('history_delete', record_id=record.id) }}" method="post" onsubmit="return confirm('이 기록을 삭제하시겠습니까?');">
+                    <button type="submit" style="background: none; border: none; color: red; cursor: pointer; padding: 0; font-size: 1em;">삭제</button>
+                </form>
+            </td>
         </tr>
-        {% else %} <tr> <td colspan="2">위치 기록이 없습니다.</td> </tr> {% endfor %}
+        {% else %} 
+        <tr> <td colspan="3" style="text-align: center;">위치 기록이 없습니다.</td> </tr> 
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}

@@ -42,10 +42,11 @@
     <a href="/create/plan" class="button button-plan">새 계획서 작성</a>
     <a href="/select_plan_for_report" class="button button-report">새 보고서 작성</a>
 </div>
-
 <div class="grid-container">
     <div class="section">
-        <h2>실시간 위치 현황 <span style="font-size: 0.6em; color: #6c757d;">({{ current_time }})</span></h2>
+        <h2>실시간 위치 현황 <span style="font-size: 0.6em; color: #6c757d;">({{ current_time }})</span>
+        <a href="/daily_log" style="float: right; font-size: 12px; font-weight: bold; text-decoration: none; background-color: #6c757d; color: white; padding: 5px 10px; border-radius: 5px;">전체기록</a>
+        </h2>
         <form action="/update_location" method="post" style="display: flex; gap: 5px; margin-bottom: 20px;">
             <input type="text" name="new_location" placeholder="내 위치 업데이트" required style="flex-grow: 1; padding: 8px;">
             <button type="submit" style="border:none; cursor:pointer; background-color:#007bff; color:white; border-radius:5px;">변경</button>

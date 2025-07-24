@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block title %}일자별 위치 현황{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 800px; }
+    h1 { text-align: center; }
+    .date-filter { text-align: center; margin-bottom: 30px; }
+    .user-log { margin-bottom: 20px; }
+    .user-log h3 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .user-log ul { list-style-type: none; padding-left: 20px; }
+    .user-log li { margin-bottom: 5px; }
+    .timestamp { font-weight: bold; color: #007bff; margin-right: 10px; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>일자별 위치 현황</h1>
+
+<div class="date-filter">
+    <form method="get">
+        <input type="date" name="selected_date" value="{{ selected_date }}">
+        <button type="submit">조회</button>
+    </form>
+</div>
+
+{% for username, records in locations_by_user.items() %}
+<div class="user-log">
+    <h3>{{ user_name_map.get(username, username) }}</h3>
+    <ul>
+        {% for record in records %}
+        <li>
+            <span class="timestamp">{{ record.timestamp.split(' ')[1] }}</span>
+            <span>{{ record.location }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<p style="text-align: center;">{{ selected_date }} 에는 위치 기록이 없습니다.</p>
+{% endfor %}
+
+{% endblock %}
