@@ -594,3 +594,13 @@ def wiki_search():
 def wiki_delete(title):
     db = get_db(); db.execute("DELETE FROM wiki_pages WHERE title = ?", (title,)); db.commit()
     flash(f"'{title}' 문서가 삭제되었습니다."); return redirect(url_for('wiki_index'))
+
+with app.app_context():
+    init_db()
+    # uploads, maintenance_uploads 폴더도 없으면 생성
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+    if not os.path.exists(MAINTENANCE_FOLDER):
+        os.makedirs(MAINTENANCE_FOLDER)
+    print("Database and data folders have been checked and initialized if necessary.")
+    
