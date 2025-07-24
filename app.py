@@ -87,22 +87,26 @@ def admin_required(f):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# app.py 에서 daily_location_reset 함수를 찾아 교체하세요.
+
 def daily_location_reset():
+    # 이 함수는 Flask 요청 안에서만 DB에 접근해야 하므로,
+    # with app.app_context() 블록은 여기서는 필요 없습니다.
+    # index() 함수가 호출될 때 app 컨텍스트 안에서 실행됩니다.
     try:
-        # 수정된 경로 변수 사용
         with open(LAST_RESET_FILE, 'r') as f: last_reset_date = date.fromisoformat(f.read().strip())
     except (FileNotFoundError, ValueError):
         last_reset_date = date.min
+    
     today = date.today()
     now = datetime.now()
     if now.hour >= 9 and last_reset_date < today:
-        with app.app_context():
-            db = get_db()
-            today_str = today.strftime('%Y-%m-%d')
-            db.execute("UPDATE users SET location = '사무실' WHERE last_updated < ?", (today_str,)); db.commit()
-            # 수정된 경로 변수 사용
-            with open(LAST_RESET_FILE, 'w') as f: f.write(today_str)
-            print(f"[{today_str}] Daily location reset has been performed.")
+        db = get_db()
+        today_str = today.strftime('%Y-%m-%d')
+        db.execute("UPDATE users SET location = '사무실' WHERE last_updated < ?", (today_str,))
+        db.commit()
+        with open(LAST_RESET_FILE, 'w') as f: f.write(today_str)
+        print(f"[{today_str}] Daily location reset has been performed.")
 
 def process_wiki_links(content):
     def replace_link(match):
@@ -215,17 +219,33 @@ def update_location():
     db.commit()
     return redirect(url_for('index'))
 
+# app.py 에서 history 함수를 찾아 이 코드로 교체하세요.
+
 @app.route('/history/<username>')
 @login_required
 def history(username):
-    db = get_db(); filter_period = request.args.get('filter', 'all')
-    query = "SELECT location, timestamp FROM location_history WHERE username = ? "; params = [username]
-    if filter_period == 'weekly': query += "AND timestamp >= ? "; params.append(datetime.now() - timedelta(days=7))
-    elif filter_period == 'monthly': query += "AND timestamp >= ? "; params.append(datetime.now() - timedelta(days=30))
+    db = get_db()
+    filter_period = request.args.get('filter', 'all')
+    
+    # ▼▼ SELECT 구문에 'id'를 추가합니다 ▼▼
+    query = "SELECT id, location, timestamp FROM location_history WHERE username = ? "
+    params = [username]
+
+    if filter_period == 'weekly':
+        query += "AND timestamp >= ? "
+        params.append(datetime.now() - timedelta(days=7))
+    elif filter_period == 'monthly':
+        query += "AND timestamp >= ? "
+        params.append(datetime.now() - timedelta(days=30))
+
     query += "ORDER BY timestamp DESC"
     records = db.execute(query, tuple(params)).fetchall()
+    
     user = db.execute("SELECT name, username FROM users WHERE username = ?", (username,)).fetchone()
-    if user is None: flash(f"'{username}' 사용자를 찾을 수 없습니다."); return redirect(url_for('index'))
+    if user is None:
+        flash(f"'{username}' 사용자를 찾을 수 없습니다.")
+        return redirect(url_for('index'))
+    
     return render_template('history.html', user=user, records=records, current_filter=filter_period)
 
 # --- 문서 관련 라우트 ---
@@ -595,12 +615,63 @@ def wiki_delete(title):
     db = get_db(); db.execute("DELETE FROM wiki_pages WHERE title = ?", (title,)); db.commit()
     flash(f"'{title}' 문서가 삭제되었습니다."); return redirect(url_for('wiki_index'))
 
+# app.py 에 아래 함수를 추가하세요.
+
+@app.route('/daily_log')
+@login_required
+def daily_log():
+    """날짜를 선택하여 해당 날짜의 모든 사용자 위치 기록을 보여줍니다."""
+    # URL에서 날짜를 가져오고, 없으면 오늘 날짜를 기본값으로 사용
+    selected_date_str = request.args.get('selected_date', date.today().strftime('%Y-%m-%d'))
+    
+    db = get_db()
+    
+    # 선택된 날짜의 모든 위치 기록을 사용자별, 시간순으로 가져오기
+    query = "SELECT username, location, timestamp FROM location_history WHERE DATE(timestamp) = ? ORDER BY username, timestamp"
+    records = db.execute(query, (selected_date_str,)).fetchall()
+    
+    # 사용자 아이디(username)를 이름(name)으로 바꾸기 위한 정보
+    users = db.execute("SELECT username, name FROM users").fetchall()
+    user_name_map = {user['username']: user['name'] for user in users}
+    
+    # 사용자별로 기록을 그룹화
+    locations_by_user = defaultdict(list)
+    for record in records:
+        locations_by_user[record['username']].append(record)
+
+    return render_template('daily_log.html', 
+                           selected_date=selected_date_str,
+                           locations_by_user=locations_by_user,
+                           user_name_map=user_name_map)
+
+
+@app.route('/history/delete/<int:record_id>', methods=['POST'])
+@login_required
+def history_delete(record_id):
+    db = get_db()
+    record = db.execute("SELECT username FROM location_history WHERE id = ?", (record_id,)).fetchone()
+
+    if record is None:
+        flash("존재하지 않는 기록입니다.")
+    # 관리자이거나 본인의 기록일 경우에만 삭제 허용
+    elif session['user_id'] == 1 or record['username'] == session['username']:
+        db.execute("DELETE FROM location_history WHERE id = ?", (record_id,))
+        db.commit()
+        flash("기록이 삭제되었습니다.")
+    else:
+        flash("삭제할 권한이 없습니다.")
+    
+    # 이전 페이지로 돌아가기 (본인 기록 페이지 또는 관리자 페이지 등)
+    # 간단하게는 본인 기록 페이지로 보냅니다.
+    return redirect(url_for('history', username=session['username']))
+
+
 with app.app_context():
     init_db()
     # uploads, maintenance_uploads 폴더도 없으면 생성
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
     if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
+       os.makedirs(UPLOAD_FOLDER)
     if not os.path.exists(MAINTENANCE_FOLDER):
-        os.makedirs(MAINTENANCE_FOLDER)
-    print("Database and data folders have been checked and initialized if necessary.")
-    
+       os.makedirs(MAINTENANCE_FOLDER)
