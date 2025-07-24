@@ -15,6 +15,17 @@
     .pagination a { margin: 0 5px; padding: 8px 12px; text-decoration: none; color: #007bff; border: 1px solid #ddd; border-radius: 5px; }
     .pagination a.active { background-color: #007bff; color: white; border-color: #007bff; }
     .pagination a.disabled { color: #ccc; pointer-events: none; }
+        @media (max-width: 768px) {
+        .grid-container {
+            grid-template-columns: 1fr; /* 2단 그리드를 1단으로 변경 */
+        }
+        h1 {
+            font-size: 1.5em; /* 모바일에서 제목 크기 살짝 줄임 */
+        }
+        .button-group {
+            flex-direction: column; /* 버튼들을 세로로 쌓음 */
+        }
+    }
 </style>
 {% endblock %}
 

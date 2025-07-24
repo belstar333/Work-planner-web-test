@@ -44,6 +44,17 @@
     .new-page-form { margin-top: 20px; }
     .new-page-form input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
     .new-page-form button { width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        @media (max-width: 768px) {
+        .grid-container {
+            grid-template-columns: 1fr; /* 2단 그리드를 1단으로 변경 */
+        }
+        h1 {
+            font-size: 1.5em; /* 모바일에서 제목 크기 살짝 줄임 */
+        }
+        .button-group {
+            flex-direction: column; /* 버튼들을 세로로 쌓음 */
+        }
+    }
 </style>
 {% endblock %}
 

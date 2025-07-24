@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}업무 관리 시스템{% endblock %}</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; margin: 0; }
@@ -12,13 +13,31 @@
         .navbar .user-info { margin: 0 10px; }
         .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
         .flash-messages { padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px; margin-bottom: 15px; }
+            .nav-links {
+        display: flex; /* 항목들을 가로로 정렬 */
+        align-items: center; /* 세로 중앙 정렬 */
+        gap: 12px; /* 항목 사이의 간격 */
+    }
+    .nav-links a, .nav-links span {
+        position: relative; /* 구분선 위치의 기준점 */
+    }
+    /* 첫 번째 항목을 제외한 나머지 항목들 앞에 구분선 추가 */
+    .nav-links a:not(:first-child)::before, 
+    .nav-links span::before {
+        content: '|';
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d; /* 구분선 색상 */
+    }
     </style>
     {% block style %}{% endblock %}
 </head>
 <body>
     <nav class="navbar">
         <a href="/" class="logo">업무 관리 시스템</a>
-        <div>
+        <div class="nav-links">
             {% if session.username %}
                 {% if session.user_id == 1 %}
                     <a href="/admin">관리자</a>
