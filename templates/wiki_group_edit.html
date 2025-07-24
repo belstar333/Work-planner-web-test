@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}{{ group.name }} 그룹 편집{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 600px; }
+    .edit-container { padding: 20px; background-color: #fff; border-radius: 8px; }
+    h1 { text-align: center; }
+    .delete-section { margin-top: 30px; padding: 20px; border: 1px solid #dc3545; border-radius: 5px; }
+    .delete-btn { background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="edit-container">
+    <h1>'{{ group.name }}' 그룹 편집</h1>
+    
+    <div class="delete-section">
+        <h3>그룹 삭제</h3>
+        <p>이 그룹을 삭제합니다. 그룹에 속해있던 문서들은 '그룹 없음' 상태가 됩니다. 이 작업은 되돌릴 수 없습니다.</p>
+        <form action="{{ url_for('delete_group', group_id=group.id) }}" method="post" onsubmit="return confirm('정말로 이 그룹을 삭제하시겠습니까?');">
+            <button type="submit" class="delete-btn">그룹 삭제하기</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

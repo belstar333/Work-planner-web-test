@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}'{{ query }}' 검색 결과{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 900px; }
+    h1 { text-align: center; }
+    .search-result { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+    .search-result h2 a { text-decoration: none; color: #007bff; }
+    .search-result .snippet { color: #555; font-size: 0.9em; }
+    .pagination { text-align: center; margin-top: 30px; }
+    .pagination a { margin: 0 5px; padding: 8px 12px; text-decoration: none; color: #007bff; border: 1px solid #ddd; border-radius: 5px; }
+    .pagination a.active { background-color: #007bff; color: white; border-color: #007bff; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>'{{ query }}'에 대한 검색 결과</h1>
+
+{% for result in results %}
+<div class="search-result">
+    <h2><a href="{{ url_for('wiki_view', title=result.title) }}">{{ result.title }}</a></h2>
+    <p class="snippet">
+        {{ result.content[:200] }}...
+    </p>
+</div>
+{% else %}
+<p style="text-align: center;">검색 결과가 없습니다.</p>
+{% endfor %}
+
+<div class="pagination">
+    {% if total_pages > 1 %}
+        {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('wiki_search', query=query, page=p) }}" 
+               class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

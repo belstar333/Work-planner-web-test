@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block title %}회원가입{% endblock %}
+{% block style %}
+<style>
+    .form-container { max-width: 400px; margin: 40px auto; padding: 20px; background-color: #fff; border-radius: 8px; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+    button { display: block; width: 100%; padding: 12px; margin-top: 20px; background-color: #28a745; color: white; border: none; font-size: 16px; cursor: pointer; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>회원가입</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes style="color: red; list-style-type: none; padding: 0; text-align: center;">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+<form method="post">
+    <label for="name">이름 (표시될 이름)</label>
+    <input type="text" id="name" name="name" required>
+    
+    <label for="username">아이디 (로그인용)</label>
+    <input type="text" id="username" name="username" required>
+    
+    <label for="position">직급</label>
+    <input type="text" id="position" name="position">
+
+    <label for="contact">연락처</label>
+    <input type="text" id="contact" name="contact">
+    <label for="password">비밀번호</label>
+    <input type="password" id="password" name="password" required>
+    
+    <label for="password2">비밀번호 확인</label>
+    <input type="password" id="password2" name="password2" required>
+    
+    <button type="submit">가입하기</button>
+</form>
+</div>
+{% endblock %}

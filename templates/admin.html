@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+{% block title %}관리자 페이지{% endblock %}
+{% block style %}
+<style>
+    .admin-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+    th { background-color: #e9ecef; }
+    .delete-btn { color: #dc3545; background: none; border: none; cursor: pointer; font-weight: bold; }
+    .password-form { display: flex; gap: 5px; }
+    .password-form input { flex-grow: 1; padding: 5px; }
+    .password-form button { padding: 5px 10px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <h1>사용자 관리</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+                <li style="color: green;">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>사용자 이름</th>
+                <th>비밀번호 변경</th>
+                <th>삭제</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>
+                    <form action="{{ url_for('change_password', user_id=user.id) }}" method="post" class="password-form">
+                        <input type="password" name="new_password" placeholder="새 비밀번호" required>
+                        <button type="submit">변경</button>
+                    </form>
+                </td>
+                <td>
+                    {% if user.id != 1 %}
+                    <form action="{{ url_for('delete_user', user_id=user.id) }}" method="post" onsubmit="return confirm('정말로 이 사용자를 삭제하시겠습니까?');">
+                        <button type="submit" class="delete-btn">삭제</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+{% block title %}대시보드{% endblock %}
+{% block style %}
+<style>
+    h1, h2, h3 { text-align: center; }
+    h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+    h3 { text-align: left; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 30px; }
+    h3 a { color: #333; text-decoration: none; }
+    .grid-container { display: grid; grid-template-columns: 4fr 6fr; gap: 40px; }
+    .section { padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .button-group { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+    .button { display: inline-block; padding: 12px 20px; text-align: center; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
+    .button-plan { background-color: #28a745; }
+    .button-report { background-color: #007bff; }
+    ul { list-style-type: none; padding: 0; max-height: 250px; overflow-y: auto; }
+    li { background-color: #f8f9fa; border: 1px solid #ddd; margin-top: -1px; padding: 12px; }
+    li a { text-decoration: none; color: #333; display: block; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; vertical-align: middle; }
+    th { background-color: #e9ecef; }
+    td:first-child a { font-weight: bold; color: #0056b3; }
+    .filter-form { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px; align-items: center; }
+    .filter-form select, .filter-form button { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    .filter-form button { background-color: #6c757d; color: white; cursor: pointer; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>업무 관리 대시보드</h1>
+<div class="button-group">
+    <a href="/create/plan" class="button button-plan">새 계획서 작성</a>
+    <a href="/select_plan_for_report" class="button button-report">새 보고서 작성</a>
+</div>
+
+<div class="grid-container">
+    <div class="section">
+        <h2>실시간 위치 현황 <span style="font-size: 0.6em; color: #6c757d;">({{ current_time }})</span></h2>
+        <form action="/update_location" method="post" style="display: flex; gap: 5px; margin-bottom: 20px;">
+            <input type="text" name="new_location" placeholder="내 위치 업데이트" required style="flex-grow: 1; padding: 8px;">
+            <button type="submit" style="border:none; cursor:pointer; background-color:#007bff; color:white; border-radius:5px;">변경</button>
+        </form>
+        <table>
+            <thead> <tr> <th>이름</th> <th>현재 위치</th> </tr> </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><a href="/history/{{ user.username }}">{{ user.name }}</a></td>
+                    <td>{{ user.location }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section">
+        <h2>문서 보관함</h2>
+        <form class="filter-form" method="get" action="/">
+            <select name="period">
+                <option value="all" {{ 'selected' if current_period == 'all' }}>전체 기간</option>
+                <option value="weekly" {{ 'selected' if current_period == 'weekly' }}>최근 1주</option>
+                <option value="monthly" {{ 'selected' if current_period == 'monthly' }}>최근 1달</option>
+            </select>
+            <select name="user">
+                <option value="all">모든 사용자</option>
+                {% for user in all_users %}
+                <option value="{{ user.name }}" {{ 'selected' if current_user == user.name }}>{{ user.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">조회</button>
+        </form>
+        <h3><a href="{{ url_for('documents', doc_type='plan') }}">📋 작업 계획서 (최신 5개)</a></h3>
+        <ul>
+            {% for doc in plan_docs %}
+            <li><a href="/view/{{ doc.filename }}">{{ doc.title }} ({{ doc.created_at }} / {{ doc.created_by_user }})</a></li>
+            {% else %} <li>해당 조건의 계획서가 없습니다.</li> {% endfor %}
+        </ul>
+        <h3><a href="{{ url_for('documents', doc_type='report') }}">✅ 작업 완료 보고서 (최신 5개)</a></h3>
+        <ul>
+            {% for doc in report_docs %}
+            <li><a href="/view/{{ doc.filename }}">{{ doc.title }} ({{ doc.created_at }} / {{ doc.created_by_user }})</a></li>
+            {% else %} <li>해당 조건의 보고서가 없습니다.</li> {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

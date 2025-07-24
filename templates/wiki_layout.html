@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+
+{% block style %}
+<style>
+    .wiki-grid-container {
+        display: grid;
+        grid-template-columns: 3fr 1fr; /* 왼쪽 컨텐츠와 오른쪽 사이드바 비율 */
+        gap: 30px;
+        align-items: flex-start;
+    }
+    .wiki-main-content {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    .wiki-sidebar {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        position: sticky; /* 스크롤해도 사이드바는 제자리에 있도록 */
+        top: 20px;
+    }
+    .wiki-sidebar h3 {
+        margin-top: 0;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .wiki-sidebar ul {
+        list-style-type: none;
+        padding: 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .wiki-sidebar li a {
+        display: block;
+        padding: 8px 10px;
+        text-decoration: none;
+        color: #007bff;
+        border-radius: 4px;
+    }
+    .wiki-sidebar li a:hover {
+        background-color: #f1f1f1;
+    }
+    .new-page-form { margin-top: 20px; }
+    .new-page-form input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    .new-page-form button { width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wiki-grid-container">
+    <div class="wiki-main-content">
+        {% block wiki_content %}
+        {% endblock %}
+    </div>
+<aside class="wiki-sidebar">
+        <h3>문서 검색</h3>
+    <form action="{{ url_for('wiki_search') }}" method="get" class="new-page-form">
+        <input type="text" name="query" placeholder="검색어 입력" required>
+        <button type="submit">검색</button>
+    </form>
+    <hr>
+    
+    <h3>새 문서 만들기</h3>
+    <form action="{{ url_for('wiki_create') }}" method="post" class="new-page-form">
+        <input type="text" name="title" placeholder="문서 제목" required>
+        <button type="submit">생성</button>
+    </form>
+    <hr>
+    <h3>새 그룹 만들기</h3>
+    <form action="{{ url_for('create_group') }}" method="post" class="new-page-form">
+        <input type="text" name="group_name" placeholder="새 그룹 이름" required>
+        <select name="parent_id" style="width: 100%; margin-top: 5px; padding: 8px;">
+            <option value="none">-- 상위 그룹 없음 --</option>
+            {% for group in all_groups_flat %}
+            <option value="{{ group.id }}">{{ group.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">생성</button>
+    </form>
+    <hr>
+    <h3>문서 목록</h3>
+    
+    {% macro render_group(group) %}
+        <li>
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: #f0f0f0;">
+                <span class="toggle" style="cursor: pointer; padding: 8px;">[+]</span>
+                <strong>{{ group.name }}</strong>
+                <a href="{{ url_for('edit_group', group_id=group.id) }}" style="padding: 0 8px; text-decoration: none;">편집</a>
+            </div>
+            <ul class="sub-list" style="display: none; padding-left: 20px;">
+                {% for page in group.pages %}
+                    <li><a href="{{ url_for('wiki_view', title=page.title) }}">{{ page.title }}</a></li>
+                {% endfor %}
+                {% for child in group.children %}
+                    {{ render_group(child) }}
+                {% endfor %}
+            </ul>
+        </li>
+    {% endmacro %}
+    
+    <ul>
+        {% for group in structured_groups %}
+            {{ render_group(group) }}
+        {% endfor %}
+        {% if pages_no_group %}
+            <li style="background-color: #e9ecef; padding: 8px;"><strong>그룹 없음</strong></li>
+            {% for page in pages_no_group %}
+                <li><a href="{{ url_for('wiki_view', title=page.title) }}">{{ page.title }}</a></li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</aside>
+<script>
+    document.querySelectorAll('.toggle').forEach(item => {
+        item.addEventListener('click', event => {
+            const subList = item.parentElement.nextElementSibling;
+            if (subList.style.display === 'none') {
+                subList.style.display = 'block';
+                item.textContent = '[-]';
+            } else {
+                subList.style.display = 'none';
+                item.textContent = '[+]';
+            }
+        });
+    });
+</script>
+</div>
+{% endblock %}

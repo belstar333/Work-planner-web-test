@@ -1,0 +1,27 @@
+{% extends 'wiki_layout.html' %}
+
+{% block wiki_content %}
+    {% if page %}
+        <div class="wiki-header" style="border-bottom: 2px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+            <h1>{{ page.title }}</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="{{ url_for('wiki_edit', title=page.title) }}" style="padding: 8px 15px; background-color: #ffc107; color: #212529; text-decoration: none; border-radius: 5px;">편집</a>
+                <form action="{{ url_for('wiki_delete', title=page.title) }}" method="post" onsubmit="return confirm('정말로 이 문서를 삭제하시겠습니까?');">
+                    <button type="submit" style="background-color:#dc3545; color:white; border:none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">삭제</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="wiki-content" style="margin-top: 20px; line-height: 1.7;">
+            {{ content|safe }}
+        </div>
+        
+        <hr>
+        <p style="font-size: 0.9em; color: #6c757d;">
+            마지막 수정: {{ page.last_edited_at }} (수정자: {{ page.last_edited_by }})
+        </p>
+    {% else %}
+        <h1>위키에 오신 것을 환영합니다!</h1>
+        <p>오른쪽 목록에서 문서를 선택하거나, 새 문서를 만들어보세요.</p>
+    {% endif %}
+{% endblock %}

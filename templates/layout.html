@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}업무 관리 시스템{% endblock %}</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; margin: 0; }
+        .navbar { background-color: #343a40; padding: 10px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; }
+        .navbar a:hover { background-color: #495057; }
+        .navbar .logo { font-size: 1.5em; font-weight: bold; }
+        .navbar .user-info { margin: 0 10px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .flash-messages { padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px; margin-bottom: 15px; }
+    </style>
+    {% block style %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">업무 관리 시스템</a>
+        <div>
+            {% if session.username %}
+                {% if session.user_id == 1 %}
+                    <a href="/admin">관리자</a>
+                {% endif %}
+                <a href="/history/{{ session.username }}">내 위치 기록</a>
+                <a href="/maintenance">유지보수 내역</a>
+                <a href="/wiki">위키</a>
+                <span class="user-info">환영합니다, {{ session.name }}님</span>
+                <a href="/logout">로그아웃</a>
+            {% else %}
+                <a href="/login">로그인</a>
+                <a href="/register">회원가입</a>
+            {% endif %}
+        </div>
+    </nav>
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}<span>{{ message }}</span>{% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

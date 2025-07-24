@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 900px; }
+    h1 { text-align: center; }
+    .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .filter-form { display: flex; gap: 10px; align-items: center; }
+    .filter-form select, .filter-form button { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+    th { background-color: #e9ecef; }
+    td a { font-weight: bold; color: #007bff; text-decoration: none; }
+    .pagination { text-align: center; margin-top: 30px; }
+    .pagination a { margin: 0 5px; padding: 8px 12px; text-decoration: none; color: #007bff; border: 1px solid #ddd; border-radius: 5px; }
+    .pagination a.active { background-color: #007bff; color: white; border-color: #007bff; }
+    .pagination a.disabled { color: #ccc; pointer-events: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>- {{ title }} -</h1>
+
+<div class="header-controls">
+    <form class="filter-form" method="get">
+        <select name="year" onchange="this.form.submit()">
+            <option value="">-- 연도 --</option>
+            {% for y in years %}
+            <option value="{{ y.year }}" {% if y.year == selected_year %}selected{% endif %}>{{ y.year }}년</option>
+            {% endfor %}
+        </select>
+        <select name="month" onchange="this.form.submit()">
+            <option value="">-- 월 --</option>
+            {% for m in range(1, 13) %}
+            <option value="{{ m }}" {% if m|string == selected_month %}selected{% endif %}>{{ m }}월</option>
+            {% endfor %}
+        </select>
+        <select name="user" onchange="this.form.submit()">
+            <option value="all">-- 사용자 --</option>
+            {% for u in all_users %}
+            <option value="{{ u.name }}" {% if u.name == selected_user %}selected{% endif %}>{{ u.name }}</option>
+            {% endfor %}
+        </select>
+        <a href="{{ url_for('documents', doc_type=doc_type) }}" style="text-decoration: none;">필터 초기화</a>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>제목</th>
+            <th>작성일자</th>
+            <th>작성자</th>
+            <th>관리</th> </tr>
+    </thead>
+    <tbody>
+        {% for doc in docs %}
+        <tr>
+            <td><a href="{{ url_for('view', filename=doc.filename) }}">{{ doc.title }}</a></td>
+            <td>{{ doc.created_at }}</td>
+            <td>{{ doc.created_by_user }}</td>
+            <td style="display: flex; gap: 5px;">
+                <a href="{{ url_for('edit_document', doc_id=doc.id) }}" style="padding: 5px 10px; background-color: #ffc107; color: #333; border-radius: 5px; text-decoration: none;">수정</a>
+                <form action="{{ url_for('delete_document', doc_id=doc.id) }}" method="post" onsubmit="return confirm('정말로 이 문서를 삭제하시겠습니까?');">
+                    <button type="submit" style="padding: 5px 10px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">삭제</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center;">해당 조건의 문서가 없습니다.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {% if total_pages > 1 %}
+        <a href="{{ url_for('documents', doc_type=doc_type, page=page-1, **args_for_pagination) }}" 
+           class="{{ 'disabled' if page <= 1 else '' }}">&laquo; 이전</a>
+        
+        {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('documents', doc_type=doc_type, page=p, **args_for_pagination) }}" 
+               class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+        {% endfor %}
+
+        <a href="{{ url_for('documents', doc_type=doc_type, page=page+1, **args_for_pagination) }}" 
+           class="{{ 'disabled' if page >= total_pages else '' }}">다음 &raquo;</a>
+    {% endif %}
+</div>
+{% endblock %}

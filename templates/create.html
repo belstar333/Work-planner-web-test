@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% block title %}{% if doc and doc.id %}문서 정보 수정{% else %}{{ '작업 계획서' if doc_type == 'plan' else '작업 완료 보고서' }} 작성{% endif %}{% endblock %}
+
+{% block style %}
+<style>
+    .form-container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input[type="text"], textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+    textarea { min-height: 100px; resize: vertical; }
+    button { display: block; width: 100%; padding: 12px; margin-top: 20px; background-color: #007bff; color: white; border: none; font-size: 16px; cursor: pointer; border-radius: 5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>{% if doc and doc.id and not request.args.get('from_plan_id') %}문서 정보 수정{% else %}{{ '작업 계획서' if doc_type == 'plan' else '작업 완료 보고서' }} 작성{% endif %}</h1>
+    
+    <form action="{{ url_for('submit') }}" method="post">
+        {% if doc and doc.id and not request.args.get('from_plan_id') %}<input type="hidden" name="doc_id" value="{{ doc.id }}">{% endif %}
+        {% if request.args.get('from_plan_id') %}<input type="hidden" name="from_plan_id" value="{{ request.args.get('from_plan_id') }}">{% endif %}
+        <input type="hidden" name="doc_type" value="{{ doc_type }}">
+
+        <label for="title">문서 제목</label>
+        <input type="text" id="title" name="title" value="{{ doc.title if doc else '' }}" required>
+        
+        <label for="work_date">일자</label>
+        <input type="text" id="work_date" name="work_date" value="{{ doc.created_at if doc else today }}" required>
+        
+        <label for="task_name">작업명</label>
+        <input type="text" id="task_name" name="task_name" value="{{ doc.task_name if doc else '' }}">
+        
+        <label for="position">직급</label>
+        <input type="text" id="position" name="position" value="{{ doc.position if doc else session.position }}">
+
+        <label for="contact">연락처</label>
+        <input type="text" id="contact" name="contact" value="{{ doc.contact if doc else session.contact }}">
+        
+        <label for="work_time">작업 시간</label>
+        <input type="text" id="work_time" name="work_time" value="{{ doc.work_time if doc else '' }}">
+        
+        <label for="work_location">작업위치(업체)</label>
+        <input type="text" id="work_location" name="work_location" value="{{ doc.work_location if doc else '' }}">
+        
+        <label for="work_details">작업내용</label>
+        <textarea id="work_details" name="work_details">{{ doc.work_details if doc else '' }}</textarea>
+
+        <button type="submit">저장하기</button>
+    </form>
+</div>
+{% endblock %}

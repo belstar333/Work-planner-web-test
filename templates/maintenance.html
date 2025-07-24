@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block title %}유지보수 내역{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 900px; } /* 상속받는 layout.html에 container가 이미 있으므로 중복 제거 가능 */
+    h1 { text-align: center; }
+    .upload-section { padding: 20px; border: 2px dashed #007bff; border-radius: 5px; text-align: center; margin-bottom: 30px; }
+    input[type="file"] { border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+    button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+    th { background-color: #e9ecef; }
+    a { text-decoration: none; }
+    .delete-btn { padding: 5px 10px; background-color: #dc3545; color: white; border-radius: 5px; font-size: 12px; }
+    .pagination { text-align: center; margin-top: 30px; }
+    .pagination a { margin: 0 5px; padding: 8px 12px; text-decoration: none; color: #007bff; border: 1px solid #ddd; border-radius: 5px; }
+    .pagination a.active { background-color: #007bff; color: white; border-color: #007bff; }
+    .pagination a.disabled { color: #ccc; pointer-events: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="maintenance-container" style="background-color: #fff; border-radius: 8px; padding: 20px;">
+    <h1>유지보수 내역</h1>
+    <div class="upload-section">
+        <form action="{{ url_for('upload_maintenance') }}" method="post" enctype="multipart/form-data">
+            <textarea name="description" placeholder="파일에 대한 간단한 설명을 입력하세요." rows="3" style="width: 98%; margin-bottom: 10px;"></textarea>
+            <input type="file" name="file" required>
+            <button type="submit">파일 업로드</button>
+        </form>
+    </div>
+
+    <h2>업로드된 파일 목록</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>파일명</th>
+                <th>설명</th>
+                <th>업로드한 사람</th>
+                <th>업로드 일시</th>
+                <th>삭제</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in files %}
+            <tr>
+                <td><a href="{{ url_for('view_maintenance', filename=file.filename) }}" target="_blank">{{ file.filename }}</a></td>
+                <td>{{ file.description }}</td>
+                <td>{{ file.uploaded_by }}</td>
+                <td>{{ file.uploaded_at }}</td>
+                <td>
+                    <form action="{{ url_for('delete_maintenance', file_id=file.id) }}" method="post" onsubmit="return confirm('정말로 이 파일을 삭제하시겠습니까?');">
+                        <button type="submit" class="delete-btn">삭제</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align: center;">업로드된 파일이 없습니다.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if total_pages > 1 %}
+            <a href="{{ url_for('maintenance', page=page-1) }}" 
+               class="{{ 'disabled' if page <= 1 else '' }}">&laquo; 이전</a>
+            
+            {% for p in range(1, total_pages + 1) %}
+                <a href="{{ url_for('maintenance', page=p) }}" 
+                   class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+            {% endfor %}
+
+            <a href="{{ url_for('maintenance', page=page+1) }}" 
+               class="{{ 'disabled' if page >= total_pages else '' }}">다음 &raquo;</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

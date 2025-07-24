@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+{% block title %}계획서 선택 또는 새로 작성{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 800px; }
+    h1 { text-align: center; }
+    ul { list-style-type: none; padding: 0; }
+    li { background-color: #f8f9fa; border: 1px solid #ddd; margin-top: -1px; }
+    li a { display: block; padding: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+    li a:hover { background-color: #e9ecef; }
+    .date { font-size: 0.9em; color: #6c757d; margin-left: 10px; }
+    .direct-create-btn {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .direct-create-btn:hover { background-color: #218838; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>보고서 작성 방식 선택</h1>
+
+<a href="{{ url_for('create', doc_type='report') }}" class="direct-create-btn">
+    계획서 없이 바로 새로 작성하기
+</a>
+
+<h3>기존 계획서 불러오기:</h3>
+<ul>
+    {% for doc in plan_docs %}
+    <li>
+        <a href="{{ url_for('create', doc_type='report', from_plan_id=doc.id) }}">
+            {{ doc.title }}
+            <span class="date">(작성일: {{ doc.created_at }})</span>
+        </a>
+    </li>
+    {% else %}
+    <li>작성된 작업 계획서가 없습니다.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

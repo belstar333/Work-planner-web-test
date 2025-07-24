@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}위키 목록{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 800px; }
+    h1 { text-align: center; }
+    .wiki-list li { background-color: #fff; border-radius: 4px; margin-bottom: 10px; }
+    .wiki-list a { display: block; padding: 15px; color: #007bff; text-decoration: none; font-weight: bold; }
+    .wiki-list a:hover { background-color: #f8f9fa; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>위키 문서 목록</h1>
+<ul class="wiki-list">
+    {% for page in pages %}
+    <li><a href="{{ url_for('wiki_view', title=page.title) }}">{{ page.title }}</a></li>
+    {% else %}
+    <li>아직 작성된 위키 문서가 없습니다.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

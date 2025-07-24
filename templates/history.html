@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block title %}{{ user.name }}님 위치 기록{% endblock %}
+{% block style %}
+<style>
+    .container { max-width: 700px; }
+    h1 { text-align: center; }
+    .filter-buttons { text-align: center; margin-bottom: 20px; }
+    .filter-buttons a { padding: 8px 15px; margin: 0 5px; text-decoration: none; border: 1px solid #ddd; color: #007bff; border-radius: 5px; }
+    .filter-buttons a.active { background-color: #007bff; color: white; border-color: #007bff; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { text-align: center; padding: 12px; border-bottom: 1px solid #ddd; }
+    th { background-color: #e9ecef; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>{{ user.name }}님의 위치 기록</h1>
+<div class="filter-buttons">
+    <a href="{{ url_for('history', username=user.username, filter='all') }}" class="{{ 'active' if current_filter == 'all' }}">전체</a>
+    <a href="{{ url_for('history', username=user.username, filter='weekly') }}" class="{{ 'active' if current_filter == 'weekly' }}">최근 1주</a>
+    <a href="{{ url_for('history', username=user.username, filter='monthly') }}" class="{{ 'active' if current_filter == 'monthly' }}">최근 1달</a>
+</div>
+<table>
+    <thead> <tr> <th>날짜 / 시간</th> <th>위치</th> </tr> </thead>
+    <tbody>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.timestamp }}</td>
+            <td>{{ record.location }}</td>
+        </tr>
+        {% else %} <tr> <td colspan="2">위치 기록이 없습니다.</td> </tr> {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
